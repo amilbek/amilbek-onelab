@@ -1,7 +1,7 @@
-package com.example.shop.repo.impl;
+package com.example.shop.repository.impl;
 
 import com.example.shop.dto.User;
-import com.example.shop.repo.UserRepository;
+import com.example.shop.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

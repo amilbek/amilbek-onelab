@@ -1,4 +1,4 @@
-package com.example.shop.repo;
+package com.example.shop.repository;
 
 import com.example.shop.dto.Car;
 import com.example.shop.dto.Request;

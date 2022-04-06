@@ -1,7 +1,7 @@
-package com.example.shop.repo.impl;
+package com.example.shop.repository.impl;
 
 import com.example.shop.dto.Car;
-import com.example.shop.repo.CarRepository;
+import com.example.shop.repository.CarRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

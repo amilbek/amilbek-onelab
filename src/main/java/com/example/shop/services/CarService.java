@@ -1,7 +1,7 @@
 package com.example.shop.services;
 
 import com.example.shop.dto.Car;
-import com.example.shop.repo.impl.ICarRepository;
+import com.example.shop.repository.impl.ICarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

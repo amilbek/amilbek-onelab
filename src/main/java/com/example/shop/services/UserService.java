@@ -1,7 +1,7 @@
 package com.example.shop.services;
 
 import com.example.shop.dto.User;
-import com.example.shop.repo.impl.IUserRepository;
+import com.example.shop.repository.impl.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
