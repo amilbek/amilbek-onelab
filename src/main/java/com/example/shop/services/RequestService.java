@@ -7,7 +7,6 @@ import com.example.shop.repository.impl.IRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,7 +24,7 @@ public class RequestService {
         request.setId(requestIn.getId());
         request.setUser(requestIn.getUser());
         request.setCar(requestIn.getCar());
-        request.setRequestTime(LocalDateTime.now());
+        request.setRequestTime(requestIn.getRequestTime());
 
         requestRepository.saveRequest(request);
 

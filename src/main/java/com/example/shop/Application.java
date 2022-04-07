@@ -117,6 +117,7 @@ public class Application {
                 .id(id)
                 .user(user)
                 .car(car)
+                .time()
                 .build();
     }
 

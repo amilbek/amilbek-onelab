@@ -39,6 +39,11 @@ public class Request {
             return this;
         }
 
+        public RequestBuilder time() {
+            Request.this.requestTime = LocalDateTime.now();
+            return this;
+        }
+
         public Request build() {
             return Request.this;
         }
