@@ -1,16 +1,17 @@
-package com.example.shop.dto;
+package com.example.shop.entity;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class User {
 
+    private Long id;
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private LocalDate birthDate;
+    private Date birthDate;
 
     public User() {
     }
@@ -18,7 +19,8 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "firstName='" + firstName + '\'' +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", birthDate=" + birthDate +

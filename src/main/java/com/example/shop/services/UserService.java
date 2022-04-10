@@ -1,6 +1,6 @@
 package com.example.shop.services;
 
-import com.example.shop.dto.User;
+import com.example.shop.entity.User;
 import com.example.shop.repository.impl.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +20,13 @@ public class UserService {
     public boolean createUser(User userIn) {
         User userCheck = userRepository.getUserByPhoneNumber(userIn.getPhoneNumber());
         if (userCheck != null) {
-            System.out.println("User already exists with phone number " + userCheck.getPhoneNumber());
-            System.out.println("Already registered " + userIn.toString() + "\n");
+            System.out.println("User already exists with phone number " + userIn.getPhoneNumber());
+            System.out.println("Already registered " + userCheck.toString() + "\n");
             return false;
         }
 
         User user = new User();
+        user.setId(userIn.getId());
         user.setFirstName(userIn.getFirstName());
         user.setLastName(userIn.getLastName());
         user.setPhoneNumber(userIn.getPhoneNumber());

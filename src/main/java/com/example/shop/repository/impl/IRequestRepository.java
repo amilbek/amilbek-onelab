@@ -1,51 +1,42 @@
 package com.example.shop.repository.impl;
 
-import com.example.shop.dto.Car;
-import com.example.shop.dto.Request;
-import com.example.shop.dto.User;
+import com.example.shop.dao.impl.IRequestDao;
+import com.example.shop.entity.Car;
+import com.example.shop.entity.Request;
+import com.example.shop.entity.User;
 import com.example.shop.repository.RequestRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class IRequestRepository implements RequestRepository {
 
-    private final Map<Long, Request> requests = new HashMap<>();
+    private final IRequestDao requestDao;
+
+    @Autowired
+    public IRequestRepository(IRequestDao requestDao) {
+        this.requestDao = requestDao;
+    }
 
     @Override
     public Request saveRequest(Request request) {
-        requests.put(request.getId(), request);
-        return requests.get(request.getId());
+        return requestDao.saveRequest(request);
     }
 
     @Override
     public List<Request> getAllRequests() {
-        return new ArrayList<>(requests.values());
+        return requestDao.getAllRequests();
     }
 
     @Override
     public List<Request> getRequestsByUser(User user) {
-        List<Request> requestsByUser = new ArrayList<>();
-        for (Map.Entry<Long, Request> requestEntry : requests.entrySet()) {
-            if (requestEntry.getValue().getUser().equals(user)) {
-                requestsByUser.add(requestEntry.getValue());
-            }
-        }
-        return requestsByUser;
+        return requestDao.getRequestsByUser(user);
     }
 
     @Override
     public List<Request> getRequestsByCar(Car car) {
-        List<Request> requestsByCar = new ArrayList<>();
-        for (Map.Entry<Long, Request> requestEntry : requests.entrySet()) {
-            if (requestEntry.getValue().getCar().equals(car)) {
-                requestsByCar.add(requestEntry.getValue());
-            }
-        }
-        return requestsByCar;
+        return requestDao.getRequestsByCar(car);
     }
 }

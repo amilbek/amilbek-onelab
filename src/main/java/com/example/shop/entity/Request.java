@@ -1,16 +1,16 @@
-package com.example.shop.dto;
+package com.example.shop.entity;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 public class Request {
 
     private Long id;
-    private User user;
-    private Car car;
-    private LocalDateTime requestTime;
+    private Long userId;
+    private Long carId;
+    private Date requestTime;
 
     public Request() {
     }
@@ -19,8 +19,8 @@ public class Request {
     public String toString() {
         return "Request{" +
                 "id=" + id +
-                ", user=" + user +
-                ", car=" + car +
+                ", user=" + userId +
+                ", car=" + carId +
                 ", requestTime=" + requestTime +
                 '}';
     }

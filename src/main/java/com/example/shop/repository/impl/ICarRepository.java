@@ -1,27 +1,30 @@
 package com.example.shop.repository.impl;
 
-import com.example.shop.dto.Car;
+import com.example.shop.dao.impl.ICarDao;
+import com.example.shop.entity.Car;
 import com.example.shop.repository.CarRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class ICarRepository implements CarRepository {
 
-    private final Map<Long, Car> cars = new HashMap<>();
+    private final ICarDao carDao;
+
+    @Autowired
+    public ICarRepository(ICarDao carDao) {
+        this.carDao = carDao;
+    }
 
     @Override
     public Car saveCar(Car car) {
-        cars.put(car.getCarNumber(), car);
-        return cars.get(car.getCarNumber());
+        return carDao.saveCar(car);
     }
 
     @Override
     public List<Car> getAllCars() {
-        return new ArrayList<>(cars.values());
+        return carDao.getAllCars();
     }
 }

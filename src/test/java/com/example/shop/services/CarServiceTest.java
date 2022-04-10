@@ -1,6 +1,6 @@
 package com.example.shop.services;
 
-import com.example.shop.dto.Car;
+import com.example.shop.entity.Car;
 import com.example.shop.repository.impl.ICarRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,11 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,15 +26,8 @@ class CarServiceTest {
 
     @Test
     void saveCar() {
-        Car car = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
+        Car car = addCar(1L, "Mercedes", "S-class", "black",
+                2020, 1500, true);
 
         when(carRepository.saveCar(car)).thenReturn(car);
 
@@ -46,36 +39,36 @@ class CarServiceTest {
     void getAllCars() {
         List<Car> expectedCars = new ArrayList<>();
 
-        Car car1 = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
+        Car expectedCar1 = addCar(1L, "Mercedes", "S-class", "black",
+                2020, 1500, true);
 
-        expectedCars.add(car1);
-        carService.saveCar(car1);
+        Car expectedCar2 = addCar(2L, "Toyota", "Camry", "white",
+                2010, 1100, false);
 
+        expectedCars.add(expectedCar1);
+        expectedCars.add(expectedCar2);
 
-        Car car2 = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Toyota")
-                .model("Camry")
-                .color("white")
-                .year(Year.parse("2010"))
-                .price(150)
-                .availability(true)
-                .build();
-
-        expectedCars.add(car2);
-        carService.saveCar(car2);
+        carService.saveCar(expectedCar1);
+        carService.saveCar(expectedCar2);
 
         when(carRepository.getAllCars()).thenReturn(expectedCars);
 
         List<Car> actualCars = carService.getAllCars();
         assertEquals(expectedCars, actualCars);
+    }
+
+    private Car addCar(Long id, String brand, String model, String color, int productionYear, double price,
+                       boolean isAvailable) {
+        Car car = new Car();
+
+        car.setId(id);
+        car.setBrand(brand);
+        car.setModel(model);
+        car.setColor(color);
+        car.setProductionYear(productionYear);
+        car.setPrice(price);
+        car.setAvailable(isAvailable);
+
+        return car;
     }
 }

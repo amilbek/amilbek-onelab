@@ -1,12 +1,12 @@
-package com.example.shop.repository;
+package com.example.shop.dao;
 
 import com.example.shop.entity.User;
 
 import java.util.List;
 
-public interface UserRepository {
+public interface UserDao {
 
-    User saveUser(User user);
+    User save(User user);
 
     User getUserByPhoneNumber(String phoneNumber);
 

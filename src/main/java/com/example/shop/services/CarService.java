@@ -1,7 +1,9 @@
 package com.example.shop.services;
 
-import com.example.shop.dto.Car;
+import com.example.shop.entity.Car;
 import com.example.shop.repository.impl.ICarRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ public class CarService {
 
     public boolean saveCar(Car carIn) {
         Car car = new Car();
-        car.setCarNumber(carIn.getCarNumber());
+        car.setId(carIn.getId());
         car.setBrand(carIn.getBrand());
         car.setModel(carIn.getModel());
         car.setColor(carIn.getColor());

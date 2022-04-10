@@ -1,9 +1,10 @@
 package com.example.shop.services;
 
-import com.example.shop.dto.Car;
-import com.example.shop.dto.Request;
-import com.example.shop.dto.User;
+import com.example.shop.entity.Car;
+import com.example.shop.entity.Request;
+import com.example.shop.entity.User;
 import com.example.shop.repository.impl.IRequestRepository;
+import com.example.shop.repository.impl.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,18 +13,25 @@ import java.util.List;
 @Service
 public class RequestService {
 
+    private final IUserRepository userRepository;
     private final IRequestRepository requestRepository;
 
     @Autowired
-    public RequestService(IRequestRepository requestRepository) {
+    public RequestService(IUserRepository userRepository, IRequestRepository requestRepository) {
+        this.userRepository = userRepository;
         this.requestRepository = requestRepository;
     }
 
     public boolean saveRequest(Request requestIn) {
+        User user = userRepository.getUserById(requestIn.getUserId());
+        if (user == null) {
+            System.out.println("User does not exist to make request\n");
+            return false;
+        }
         Request request = new Request();
         request.setId(requestIn.getId());
-        request.setUser(requestIn.getUser());
-        request.setCar(requestIn.getCar());
+        request.setUserId(requestIn.getUserId());
+        request.setCarId(requestIn.getCarId());
         request.setRequestTime(requestIn.getRequestTime());
 
         requestRepository.saveRequest(request);

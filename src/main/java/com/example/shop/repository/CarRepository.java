@@ -1,6 +1,6 @@
 package com.example.shop.repository;
 
-import com.example.shop.dto.Car;
+import com.example.shop.entity.Car;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

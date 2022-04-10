@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.example.shop.dto.User;
+import com.example.shop.entity.User;
 import com.example.shop.repository.impl.IUserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,12 +28,8 @@ class UserServiceTest {
 
     @Test
     void testCreateUser() {
-        User user = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
+        User user = addUser(1L, "John", "Wick", "87770806565",
+                "13/11/1982");
 
         when(userRepository.saveUser(user)).thenReturn(user);
 
@@ -42,16 +39,12 @@ class UserServiceTest {
 
     @Test
     void testGetUserByPhoneNumber() {
-        User expected = User.userBuilder()
-                .fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
+        User expected = addUser(1L, "Tony", "Stark", "87770806555",
+                "13/11/1983");
 
         when(userRepository.getUserByPhoneNumber(expected.getPhoneNumber())).thenReturn(expected);
 
-        User actual = userService.getUserByPhoneNumber(expected.getPhoneNumber());
+        User actual = userService.getUserByPhoneNumber("87770806555");
 
         assertEquals(expected, actual);
     }
@@ -60,27 +53,35 @@ class UserServiceTest {
     void testGetAllUsers() {
         List<User> expectedUsers = new ArrayList<>();
 
-        User user1 = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
-        expectedUsers.add(user1);
-        userService.createUser(user1);
+        User expectedUser1 = addUser(1L, "John", "Wick", "87770806565",
+                "13/11/1982");
 
-        User user2 = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446656")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
-        expectedUsers.add(user2);
-        userService.createUser(user2);
+        User expectedUser2 = addUser(2L, "Tony", "Stark", "87770806555",
+                "13/11/1983");
+
+        expectedUsers.add(expectedUser1);
+        expectedUsers.add(expectedUser2);
+
+        userService.createUser(expectedUser1);
+        userService.createUser(expectedUser2);
 
         when(userRepository.getAllUsers()).thenReturn(expectedUsers);
-
         List<User> actualUsers = userService.getAllUsers();
         assertEquals(expectedUsers, actualUsers);
+    }
+
+    private User addUser(Long id, String firstName, String lastName, String phoneNumber, String birthDate) {
+        User user = new User();
+        try {
+            user.setId(id);
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setPhoneNumber(phoneNumber);
+            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(birthDate);
+            user.setBirthDate(date);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return user;
     }
 }

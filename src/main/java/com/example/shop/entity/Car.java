@@ -1,17 +1,15 @@
-package com.example.shop.dto;
+package com.example.shop.entity;
 
 import lombok.Data;
-
-import java.time.Year;
 
 @Data
 public class Car {
 
-    private Long carNumber;
+    private Long id;
     private String brand;
     private String model;
     private String color;
-    private Year productionYear;
+    private int productionYear;
     private double price;
     private boolean isAvailable;
 
@@ -21,7 +19,7 @@ public class Car {
     @Override
     public String toString() {
         return "Car{" +
-                "carNumber=" + carNumber +
+                "id=" + id +
                 ", brand='" + brand + '\'' +
                 ", model='" + model + '\'' +
                 ", color='" + color + '\'' +

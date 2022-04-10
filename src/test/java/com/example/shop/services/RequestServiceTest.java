@@ -1,21 +1,21 @@
 package com.example.shop.services;
 
-import com.example.shop.dto.Car;
-import com.example.shop.dto.Request;
-import com.example.shop.dto.User;
+import com.example.shop.entity.Car;
+import com.example.shop.entity.Request;
+import com.example.shop.entity.User;
+import com.example.shop.repository.impl.ICarRepository;
 import com.example.shop.repository.impl.IRequestRepository;
+import com.example.shop.repository.impl.IUserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,146 +27,66 @@ class RequestServiceTest {
     @Mock
     IRequestRepository requestRepository;
 
+    @Mock
+    IUserRepository userRepository;
+
+    @Mock
+    ICarRepository carRepository;
+
     @Test
     void saveRequest() {
-        User user = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
-
-        Car car = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
-
-        Request request = Request.requestBuilder()
-                .id(1L)
-                .user(user)
-                .car(car)
-                .time()
-                .build();
-
-        when(requestRepository.saveRequest(request)).thenReturn(request);
-
-        boolean result = requestService.saveRequest(request);
-        assertTrue(result);
     }
 
     @Test
     void getAllRequests() {
-        List<Request> expectedRequests = new ArrayList<>();
-
-        User user = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
-
-        Car car = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
-
-        Request request = Request.requestBuilder()
-                .id(1L)
-                .user(user)
-                .car(car)
-                .time()
-                .build();
-
-        expectedRequests.add(request);
-        requestService.saveRequest(request);
-
-        when(requestRepository.getAllRequests()).thenReturn(expectedRequests);
-
-        List<Request> actualRequests = requestService.getAllRequests();
-        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByUser() {
-        List<Request> expectedRequests = new ArrayList<>();
-
-        User user = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
-
-        Car car = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
-
-        Request request = Request.requestBuilder()
-                .id(1L)
-                .user(user)
-                .car(car)
-                .time()
-                .build();
-
-        expectedRequests.add(request);
-        requestService.saveRequest(request);
-
-        when(requestRepository.getRequestsByUser(user)).thenReturn(expectedRequests);
-
-        List<Request> actualRequests = requestService.getRequestsByUser(user);
-        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByCar() {
-        List<Request> expectedRequests = new ArrayList<>();
+    }
 
-        User user = User.userBuilder().
-                fName("firstName")
-                .lName("lastName")
-                .phoneNumber("87774446655")
-                .date(LocalDate.parse("2020-11-13"))
-                .build();
+    private User addUser(Long id, String firstName, String lastName, String phoneNumber, String birthDate) {
+        User user = new User();
+        try {
+            user.setId(id);
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setPhoneNumber(phoneNumber);
+            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(birthDate);
+            user.setBirthDate(date);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return user;
+    }
 
-        Car car = Car.carBuilder()
-                .carNumber(1L)
-                .brand("Mercedes")
-                .model("S-class")
-                .color("black")
-                .year(Year.parse("2020"))
-                .price(1500)
-                .availability(true)
-                .build();
+    private Car addCar(Long id, String brand, String model, String color, int productionYear, double price,
+                       boolean isAvailable) {
+        Car car = new Car();
 
-        Request request = Request.requestBuilder()
-                .id(1L)
-                .user(user)
-                .car(car)
-                .time()
-                .build();
+        car.setId(id);
+        car.setBrand(brand);
+        car.setModel(model);
+        car.setColor(color);
+        car.setProductionYear(productionYear);
+        car.setPrice(price);
+        car.setAvailable(isAvailable);
 
-        expectedRequests.add(request);
-        requestService.saveRequest(request);
+        return car;
+    }
 
-        when(requestRepository.getRequestsByCar(car)).thenReturn(expectedRequests);
+    private Request addRequest(Long id, Long userId, Long carId) {
+        Request request = new Request();
 
-        List<Request> actualRequests = requestService.getRequestsByCar(car);
-        assertEquals(expectedRequests, actualRequests);
+        request.setId(id);
+        request.setUserId(userId);
+        request.setCarId(carId);
+        request.setRequestTime(new Date(System.currentTimeMillis()));
+
+        return request;
     }
 }
