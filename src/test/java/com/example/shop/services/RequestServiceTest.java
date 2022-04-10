@@ -35,6 +35,22 @@ class RequestServiceTest {
 
     @Test
     void saveRequest() {
+        User user = addUser(1L, "John", "Wick", "87770806565",
+            "13/11/1982");
+
+        when(userRepository.saveUser(user)).thenReturn(user);
+
+        Car car = addCar(1L, "Mercedes", "S-class", "black",
+                2020, 1500, true);
+
+        when(carRepository.saveCar(car)).thenReturn(car);
+
+        Request request = addRequest(1L, 1L, 2L);
+
+        when(requestRepository.saveRequest(request)).thenReturn(request);
+
+        boolean result = requestService.saveRequest(request);
+        assertTrue(result);
     }
 
     @Test
