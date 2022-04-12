@@ -13,8 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -38,14 +41,10 @@ class RequestServiceTest {
         User user = addUser(1L, "John", "Wick", "87770806565",
             "13/11/1982");
 
-        when(userRepository.saveUser(user)).thenReturn(user);
-
         Car car = addCar(1L, "Mercedes", "S-class", "black",
                 2020, 1500, true);
 
-        when(carRepository.saveCar(car)).thenReturn(car);
-
-        Request request = addRequest(1L, 1L, 2L);
+        Request request = addRequest(1L, 1L, 1L);
 
         when(requestRepository.saveRequest(request)).thenReturn(request);
 
@@ -55,14 +54,65 @@ class RequestServiceTest {
 
     @Test
     void getAllRequests() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser(1L, "Tony", "Stark", "87770706565",
+                "13/11/1972");
+
+        Car car = addCar(1L, "Mercedes", "S-class", "black",
+                2020, 1500, true);
+
+        Request request = addRequest(1L, user.getId(), car.getId());
+
+        expectedRequests.add(request);
+        requestService.saveRequest(request);
+
+        when(requestRepository.getAllRequests()).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = requestService.getAllRequests();
+        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByUser() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser(1L, "John", "Wick", "87770806565",
+                "13/11/1982");
+
+        Car car = addCar(1L, "Toyota", "Camry", "white",
+                2010, 1400, false);
+
+        Request request = addRequest(2L, user.getId(), car.getId());
+
+        expectedRequests.add(request);
+        requestService.saveRequest(request);
+
+        when(requestRepository.getRequestsByUser(user)).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = requestService.getRequestsByUser(user);
+        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByCar() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser(2L, "John", "Wick", "87770806565",
+                "13/11/1982");
+
+        Car car = addCar(2L, "Mercedes", "S-class", "black",
+                2020, 1500, true);
+
+        Request request = addRequest(3L, user.getId(), car.getId());
+
+        expectedRequests.add(request);
+        requestService.saveRequest(request);
+
+        when(requestRepository.getRequestsByCar(car)).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = requestService.getRequestsByCar(car);
+        assertEquals(expectedRequests, actualRequests);
     }
 
     private User addUser(Long id, String firstName, String lastName, String phoneNumber, String birthDate) {

@@ -1,14 +1,13 @@
 package com.example.shop.aspect;
 
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
-import lombok.var;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -17,33 +16,39 @@ import java.util.stream.Collectors;
 
 @Aspect
 @Component
-@Log4j2
 public class LoggingAspect {
 
-    private static final String POINTCUT = "within(com.example.shop.services.*)";
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingAspect.class);
+    private static final String SERVICES_POINTCUT = "within(com.example.shop.services.*)";
 
-    @Around(POINTCUT)
-    @SneakyThrows
-    public Object logAroundExec(ProceedingJoinPoint pjp) {
-        var proceed = pjp.proceed();
+    @Around(SERVICES_POINTCUT)
+    public Object logAroundExec(ProceedingJoinPoint pjp) throws Throwable {
+        Object proceed = pjp.proceed();
+        String loggingMessage = constructLogMsg(pjp);
         if (proceed != null) {
-            log.info("{}, {}",constructLogMsg(pjp), proceed.toString());
+            LOG.info("{};\nReturned Values: {}\n", loggingMessage, proceed);
         } else {
-            log.info(constructLogMsg(pjp));
+            LOG.info("{};\nReturned Values: No Values\n", loggingMessage);
         }
         return proceed;
     }
 
-    @AfterThrowing(pointcut = POINTCUT, throwing = "e")
+    @AfterThrowing(pointcut = SERVICES_POINTCUT, throwing = "e")
     public void logAfterException(JoinPoint jp, Exception e) {
-        log.error("Exception during: {} with ex: {}", constructLogMsg(jp),  e.toString());
+        String loggingMessage = constructLogMsg(jp);
+        String exceptionMessage = e.toString();
+        LOG.error("Exception during: {} with ex: {}", loggingMessage,  exceptionMessage);
     }
 
     private String constructLogMsg(JoinPoint jp) {
-        var args = Arrays.stream(jp.getArgs()).map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
+        String args = Arrays
+                .stream(jp.getArgs())
+                .map(String::valueOf)
+                .collect(Collectors.joining(",", "[", "]"));
         Method method = ((MethodSignature) jp.getSignature()).getMethod();
-        return "Class: " + method.getDeclaringClass().getSimpleName() + ",\nMethod: " + method.getName() +
-                ", " + args + "\n";
+        return "\nClass: " + method.getDeclaringClass().getSimpleName() +
+                ";\nMethod: " + method.getName() +
+                ";\nArguments: " + args;
     }
 }
 
