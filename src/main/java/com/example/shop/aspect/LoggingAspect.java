@@ -37,7 +37,7 @@ public class LoggingAspect {
     public void logAfterException(JoinPoint jp, Exception e) {
         String loggingMessage = constructLogMsg(jp);
         String exceptionMessage = e.toString();
-        LOG.error("Exception during: {} with ex: {}", loggingMessage,  exceptionMessage);
+        LOG.error("Exception during: {};\nException: {}", loggingMessage,  exceptionMessage);
     }
 
     private String constructLogMsg(JoinPoint jp) {
