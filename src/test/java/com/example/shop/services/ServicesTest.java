@@ -38,7 +38,7 @@ class ServicesTest {
 
     @Test
     void saveUser() {
-        User user = addUser( "John", "Wick", "87770806565",
+        User user = addUser("John", "Wick", "87770806565",
                 "13/11/1982");
 
         when(userRepository.save(user)).thenReturn(user);
@@ -78,8 +78,10 @@ class ServicesTest {
 
         when(userRepository.save(user)).thenReturn(user);
 
-        User updatedUser = addUser("Anthony", "Crack", "87770806565",
+        User updatedUser = addUser("Anthony", "Crack", "87770806555",
                 "13/11/1973");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User newUser = sut.updateUser(updatedUser, 1L);
         assertEquals(updatedUser, newUser);
@@ -87,23 +89,25 @@ class ServicesTest {
 
     @Test
     void deleteUser() {
+        User user = addUser("Tony", "Stark", "87770806555",
+                "13/11/1983");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        boolean result = sut.deleteUser(1L);
+        assertTrue(result);
     }
 
     @Test
     void getAllUsers() {
         List<User> expectedUsers = new ArrayList<>();
 
-        User expectedUser1 = addUser("John", "Wick", "87770806565",
+        User expectedUser = addUser("John", "Wick", "87770806565",
                 "13/11/1982");
 
-        User expectedUser2 = addUser("Tony", "Stark", "87770806555",
-                "13/11/1983");
+        expectedUsers.add(expectedUser);
 
-        expectedUsers.add(expectedUser1);
-        expectedUsers.add(expectedUser2);
-
-        sut.saveUser(expectedUser1);
-        sut.saveUser(expectedUser2);
+        sut.saveUser(expectedUser);
 
         when(userRepository.findAll()).thenReturn(expectedUsers);
 
@@ -137,31 +141,41 @@ class ServicesTest {
 
     @Test
     void updateCar() {
+        Car car = addCar("Mercedes", "S-class", "black",
+                2020, 1500.0, true);
+
+        when(carRepository.save(car)).thenReturn(car);
+
+        Car updatedCar = addCar("Mercedes", "E-class", "white",
+                2020, 1450.0, false);
+
+        when(carRepository.findById(1L)).thenReturn(Optional.of(car));
+
+        Car newCar = sut.updateCar(updatedCar, 1L);
+        assertEquals(updatedCar, newCar);
     }
 
     @Test
     void deleteCar() {
-    }
+        Car car = addCar("Mercedes", "S-class", "black",
+                2020, 1500.0, true);
 
-    @Test
-    void getAllCarsByAvailability() {
+        when(carRepository.findById(1L)).thenReturn(Optional.of(car));
+
+        boolean result = sut.deleteCar(1L);
+        assertTrue(result);
     }
 
     @Test
     void getAllCars() {
         List<Car> expectedCars = new ArrayList<>();
 
-        Car expectedCar1 = addCar("Mercedes", "S-class", "black",
+        Car expectedCar = addCar("Mercedes", "S-class", "black",
                 2020, 1500.0, true);
 
-        Car expectedCar2 = addCar("Toyota", "Camry", "white",
-                2010, 1100.0, false);
+        expectedCars.add(expectedCar);
 
-        expectedCars.add(expectedCar1);
-        expectedCars.add(expectedCar2);
-
-        sut.saveCar(expectedCar1);
-        sut.saveCar(expectedCar2);
+        sut.saveCar(expectedCar);
 
         when(carRepository.findAll()).thenReturn(expectedCars);
 
@@ -173,13 +187,13 @@ class ServicesTest {
     void saveRequest() {
         User user = addUser("John", "Wick", "87770806565",
                 "13/11/1982");
-        when(userRepository.save(user)).thenReturn(user);
+        user.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         Car car = addCar("Mercedes", "S-class", "black",
                 2020, 1500.0, true);
-        when(carRepository.save(car)).thenReturn(car);
 
-        Request request = addRequest(1L, 1L, true);
+        Request request = addRequest(user, car, true);
 
         when(requestRepository.save(request)).thenReturn(request);
 
@@ -189,14 +203,77 @@ class ServicesTest {
 
     @Test
     void getRequestByRequestTime() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser("John", "Wick", "87770806565",
+                "13/11/1982");
+        user.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        Car car = addCar("Mercedes", "S-class", "black",
+                2020, 1500.0, true);
+
+        Request request = addRequest(user, car, true);
+        when(requestRepository.save(request)).thenReturn(request);
+
+        expectedRequests.add(request);
+        sut.saveRequest(request);
+
+        when(requestRepository.findAllByOrderByRequestTimeDesc()).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = sut.getRequestByRequestTime();
+
+        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByUser() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser("John", "Wick", "87770806565",
+                "13/11/1982");
+        user.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        Car car = addCar("Mercedes", "S-class", "black",
+                2020, 1500.0, true);
+
+        Request request = addRequest(user, car, true);
+        when(requestRepository.save(request)).thenReturn(request);
+
+        expectedRequests.add(request);
+        sut.saveRequest(request);
+
+        when(requestRepository.findAllByUser(user)).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = sut.getRequestsByUser(user);
+
+        assertEquals(expectedRequests, actualRequests);
     }
 
     @Test
     void getRequestsByCar() {
+        List<Request> expectedRequests = new ArrayList<>();
+
+        User user = addUser("John", "Wick", "87770806565",
+                "13/11/1982");
+        user.setId(2L);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+
+        Car car = addCar("Toyota", "Camry", "black",
+                2022, 1500.0, true);
+
+        Request request = addRequest(user, car, false);
+        when(requestRepository.save(request)).thenReturn(request);
+
+        expectedRequests.add(request);
+        sut.saveRequest(request);
+
+        when(requestRepository.findAllByCar(car)).thenReturn(expectedRequests);
+
+        List<Request> actualRequests = sut.getRequestsByCar(car);
+
+        assertEquals(expectedRequests, actualRequests);
     }
 
     private User addUser(String firstName, String lastName, String phoneNumber, String birthDate) {
@@ -227,11 +304,8 @@ class ServicesTest {
         return car;
     }
 
-    private Request addRequest(Long userId, Long carId, Boolean isAccepted) {
+    private Request addRequest(User user, Car car, Boolean isAccepted) {
         Request request = new Request();
-
-        User user = sut.getUserById(userId);
-        Car car = sut.getCarById(carId);
 
         request.setUser(user);
         request.setCar(car);
