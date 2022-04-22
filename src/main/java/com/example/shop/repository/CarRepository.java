@@ -1,14 +1,15 @@
 package com.example.shop.repository;
 
-import com.example.shop.dto.Car;
+import com.example.shop.entity.Car;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface CarRepository {
+public interface CarRepository extends JpaRepository<Car, Long> {
 
-    Car saveCar(Car car);
+    Optional<Car> findCarById(Long id);
 
-    List<Car> getAllCars();
+    Optional<Car> findCarByCarNumber(String carNumber);
 }

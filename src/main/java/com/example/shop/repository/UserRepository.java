@@ -1,14 +1,17 @@
 package com.example.shop.repository;
 
-import com.example.shop.dto.User;
+import com.example.shop.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface UserRepository {
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
 
-    User saveUser(User user);
+    Optional<User> findUserById(Long id);
 
-    User getUserByPhoneNumber(String phoneNumber);
+    Optional<User> findUserByUsername(String username);
 
-    List<User> getAllUsers();
+    Optional<User> findUserByPhoneNumber(String phoneNumber);
 }
