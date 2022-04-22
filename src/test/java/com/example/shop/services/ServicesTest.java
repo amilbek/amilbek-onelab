@@ -1,8 +1,12 @@
 package com.example.shop.services;
 
+import com.example.shop.dto.CarDTO;
+import com.example.shop.dto.RequestDTO;
+import com.example.shop.dto.UserDTO;
 import com.example.shop.entity.Car;
 import com.example.shop.entity.Request;
 import com.example.shop.entity.User;
+import com.example.shop.payload.request.SignupRequest;
 import com.example.shop.repository.CarRepository;
 import com.example.shop.repository.RequestRepository;
 import com.example.shop.repository.UserRepository;
@@ -11,12 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -36,78 +41,106 @@ class ServicesTest {
     @Mock
     RequestRepository requestRepository;
 
+    @Mock
+    BCryptPasswordEncoder passwordEncoder;
+
+    @Mock
+    Principal principal;
+
     @Test
-    void saveUser() {
-        User user = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
+    void testSaveUser() {
+        SignupRequest signupRequest = addUser(
+        );
 
-        when(userRepository.save(user)).thenReturn(user);
+        when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("password");
 
-        boolean result = sut.saveUser(user);
+        boolean result = sut.saveUser(signupRequest);
         assertTrue(result);
     }
 
     @Test
-    void getUserById() {
-        User expected = addUser("Tony", "Stark", "87770806555",
-                "13/11/1983");
+    void testUpdateUser() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(expected));
+        UserDTO userDTOExpected = addUserDTO("firstname1", "lastname1",
+                "87770806565", "1982-11-13", "username1");
+        User expected = userDtoToUser(userDTOExpected);
+
+        when(principal.getName()).thenReturn("username");
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(user));
+
+        User actual = sut.updateUser(userDTOExpected, principal);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testDeleteUser() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
+
+        when(principal.getName()).thenReturn("username");
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(user));
+
+        boolean result = sut.deleteUser(principal);
+        assertTrue(result);
+    }
+
+    @Test
+    void testGetCurrentUser() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User expected = userDtoToUser(userDTO);
+
+        when(principal.getName()).thenReturn("username");
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(expected));
+
+        User actual = sut.getCurrentUser(principal);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testGetUserById() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User expected = userDtoToUser(userDTO);
+
+        when(userRepository.findUserById(1L)).thenReturn(Optional.of(expected));
 
         User actual = sut.getUserById(1L);
-
         assertEquals(expected, actual);
     }
 
     @Test
-    void getUserByPhoneNumber() {
-        User expected = addUser("Tony", "Stark", "87770806555",
-                "13/11/1983");
+    void testGetUserByUsername() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User expected = userDtoToUser(userDTO);
 
-        when(userRepository.findUserByPhoneNumber(expected.getPhoneNumber())).thenReturn(expected);
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(expected));
 
-        User actual = sut.getUserByPhoneNumber("87770806555");
-
+        User actual = sut.getUserByUsername("username");
         assertEquals(expected, actual);
     }
 
     @Test
-    void updateUser() {
-        User user = addUser("Tony", "Stark", "87770806555",
-                "13/11/1983");
-
-        when(userRepository.save(user)).thenReturn(user);
-
-        User updatedUser = addUser("Anthony", "Crack", "87770806555",
-                "13/11/1973");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        User newUser = sut.updateUser(updatedUser, 1L);
-        assertEquals(updatedUser, newUser);
-    }
-
-    @Test
-    void deleteUser() {
-        User user = addUser("Tony", "Stark", "87770806555",
-                "13/11/1983");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        boolean result = sut.deleteUser(1L);
-        assertTrue(result);
-    }
-
-    @Test
-    void getAllUsers() {
+    void testGetAllUsers() {
         List<User> expectedUsers = new ArrayList<>();
+        SignupRequest signupRequest = addUser(
+        );
+        User expected = new User();
+        expected.setFirstName(signupRequest.getFirstName());
+        expected.setLastName(signupRequest.getLastName());
+        expected.setPhoneNumber(signupRequest.getPhoneNumber());
+        expected.setBirthDate(signupRequest.getBirthDate());
+        expected.setUsername(signupRequest.getUsername());
+        expected.setPassword(signupRequest.getPassword());
 
-        User expectedUser = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
+        expectedUsers.add(expected);
 
-        expectedUsers.add(expectedUser);
-
-        sut.saveUser(expectedUser);
+        sut.saveUser(signupRequest);
 
         when(userRepository.findAll()).thenReturn(expectedUsers);
 
@@ -117,49 +150,62 @@ class ServicesTest {
     }
 
     @Test
-    void saveCar() {
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+    void testSaveCar() {
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
 
-        when(carRepository.save(car)).thenReturn(car);
-
-        boolean result = sut.saveCar(car);
+        boolean result = sut.saveCar(carDTO);
         assertTrue(result);
     }
 
     @Test
-    void getCarById() {
-        Car expected = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+    void testGetCarById() {
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+
+        Car expected = carDtoToCar(carDTO);
 
         when(carRepository.findById(1L)).thenReturn(Optional.of(expected));
 
         Car actual = sut.getCarById(1L);
-
         assertEquals(expected, actual);
     }
 
     @Test
-    void updateCar() {
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+    void testGetCarByCarNumber() {
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
 
-        when(carRepository.save(car)).thenReturn(car);
+        Car expected = carDtoToCar(carDTO);
 
-        Car updatedCar = addCar("Mercedes", "E-class", "white",
-                2020, 1450.0, false);
+        when(carRepository.findCarByCarNumber("carNumber")).thenReturn(Optional.of(expected));
 
-        when(carRepository.findById(1L)).thenReturn(Optional.of(car));
-
-        Car newCar = sut.updateCar(updatedCar, 1L);
-        assertEquals(updatedCar, newCar);
+        Car actual = sut.getCarByCarNumber("carNumber");
+        assertEquals(expected, actual);
     }
 
     @Test
-    void deleteCar() {
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+    void testUpdateCar() {
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
+        when(carRepository.save(car)).thenReturn(car);
 
+        CarDTO carDTOExpected = addCar("carNumber1", "brand1", "model1",
+                "color1",  2120,  15100.0, true);
+        Car expected = carDtoToCar(carDTOExpected);
+
+        when(carRepository.findById(1L)).thenReturn(Optional.of(car));
+
+        Car actual = sut.updateCar(carDTOExpected, 1L);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testDeleteCar() {
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
         when(carRepository.findById(1L)).thenReturn(Optional.of(car));
 
         boolean result = sut.deleteCar(1L);
@@ -170,12 +216,13 @@ class ServicesTest {
     void getAllCars() {
         List<Car> expectedCars = new ArrayList<>();
 
-        Car expectedCar = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car expectedCar = carDtoToCar(carDTO);
 
         expectedCars.add(expectedCar);
 
-        sut.saveCar(expectedCar);
+        sut.saveCar(carDTO);
 
         when(carRepository.findAll()).thenReturn(expectedCars);
 
@@ -184,134 +231,230 @@ class ServicesTest {
     }
 
     @Test
-    void saveRequest() {
-        User user = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
-        user.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+    void testSaveRequest() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
+        when(principal.getName()).thenReturn("username");
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(user));
 
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
+        when(carRepository.findCarByCarNumber("carNumber")).thenReturn(Optional.of(car));
 
-        Request request = addRequest(user, car, true);
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO.setCarNumber(carDTO.getCarNumber());
+        requestDTO.setRequestTime(localDateTime);
+
+        Request request = addRequest(user, car, localDateTime);
 
         when(requestRepository.save(request)).thenReturn(request);
 
-        boolean result = sut.saveRequest(request);
+        boolean result = sut.saveRequest(requestDTO, principal);
         assertTrue(result);
     }
 
     @Test
-    void getRequestByRequestTime() {
-        List<Request> expectedRequests = new ArrayList<>();
+    void testGetRequestsByRequestTime() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
 
-        User user = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
-        user.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
 
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+        LocalDateTime localDateTime1 = LocalDateTime.now();
 
-        Request request = addRequest(user, car, true);
-        when(requestRepository.save(request)).thenReturn(request);
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO.setCarNumber(carDTO.getCarNumber());
+        requestDTO.setRequestTime(localDateTime1);
 
-        expectedRequests.add(request);
-        sut.saveRequest(request);
+        Request request1 = addRequest(user, car, localDateTime1);
 
-        when(requestRepository.findAllByOrderByRequestTimeDesc()).thenReturn(expectedRequests);
+        LocalDateTime localDateTime2 = LocalDateTime.now();
+        Request request2 = addRequest(user, car, localDateTime2);
 
-        List<Request> actualRequests = sut.getRequestByRequestTime();
+        List<Request> expected = new ArrayList<>();
+        expected.add(request2);
+        expected.add(request1);
 
-        assertEquals(expectedRequests, actualRequests);
+        when(requestRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Request::getRequestTime).reversed())
+                .collect(Collectors.toList())).thenReturn(expected);
+
+        List<Request> actual = sut.getRequestByRequestTime();
+        assertEquals(expected, actual);
     }
 
     @Test
-    void getRequestsByUser() {
-        List<Request> expectedRequests = new ArrayList<>();
+    void testGetRequestByUser() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
 
-        User user = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
-        user.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
 
-        Car car = addCar("Mercedes", "S-class", "black",
-                2020, 1500.0, true);
+        LocalDateTime localDateTime1 = LocalDateTime.now();
 
-        Request request = addRequest(user, car, true);
-        when(requestRepository.save(request)).thenReturn(request);
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO.setCarNumber(carDTO.getCarNumber());
+        requestDTO.setRequestTime(localDateTime1);
 
-        expectedRequests.add(request);
-        sut.saveRequest(request);
+        Request request = addRequest(user, car, localDateTime1);
 
-        when(requestRepository.findAllByUser(user)).thenReturn(expectedRequests);
+        List<Request> expected = new ArrayList<>();
+        expected.add(request);
 
-        List<Request> actualRequests = sut.getRequestsByUser(user);
+        when(requestRepository.findAll()
+                .stream()
+                .filter(r -> r.getUser().equals(user))
+                .collect(Collectors.toList())).thenReturn(expected);
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(user));
 
-        assertEquals(expectedRequests, actualRequests);
+        List<Request> actual = sut.getRequestsByUser("username");
+        assertEquals(expected, actual);
+    }
+    @Test
+    void testGetRequestByCar() {
+        UserDTO userDTO = addUserDTO("firstname", "lastname",
+                "87770806565", "1982-11-13", "username");
+        User user = userDtoToUser(userDTO);
+
+        CarDTO carDTO = addCar("carNumber", "brand", "model",
+                "color",  2020,  1500.0, true);
+        Car car = carDtoToCar(carDTO);
+
+        LocalDateTime localDateTime1 = LocalDateTime.now();
+
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO.setCarNumber(carDTO.getCarNumber());
+        requestDTO.setRequestTime(localDateTime1);
+
+        Request request = addRequest(user, car, localDateTime1);
+
+        List<Request> expected = new ArrayList<>();
+        expected.add(request);
+
+        when(requestRepository.findAll()
+                .stream()
+                .filter(r -> r.getUser().equals(user))
+                .collect(Collectors.toList())).thenReturn(expected);
+        when(carRepository.findCarByCarNumber("carNumber")).thenReturn(Optional.of(car));
+
+        List<Request> actual = sut.getRequestsByCar("carNumber");
+        assertEquals(expected, actual);
     }
 
     @Test
-    void getRequestsByCar() {
-        List<Request> expectedRequests = new ArrayList<>();
+    void testGetRequestByCurrentUser() {
+        UserDTO userDTO = addUserDTO("firstName", "lastName",
+                "87770801565", "1982-10-13", "username1");
+        User user = userDtoToUser(userDTO);
 
-        User user = addUser("John", "Wick", "87770806565",
-                "13/11/1982");
-        user.setId(2L);
-        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+        CarDTO carDTO = addCar("carNumber1", "brand1", "model1",
+                "color1",  2010,  2500.0, false);
+        Car car = carDtoToCar(carDTO);
 
-        Car car = addCar("Toyota", "Camry", "black",
-                2022, 1500.0, true);
+        LocalDateTime localDateTime1 = LocalDateTime.now();
 
-        Request request = addRequest(user, car, false);
-        when(requestRepository.save(request)).thenReturn(request);
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO.setCarNumber(carDTO.getCarNumber());
+        requestDTO.setRequestTime(localDateTime1);
 
-        expectedRequests.add(request);
-        sut.saveRequest(request);
+        Request request = addRequest(user, car, localDateTime1);
 
-        when(requestRepository.findAllByCar(car)).thenReturn(expectedRequests);
+        List<Request> expected = new ArrayList<>();
+        expected.add(request);
 
-        List<Request> actualRequests = sut.getRequestsByCar(car);
+        when(principal.getName()).thenReturn("username");
+        when(userRepository.findUserByUsername("username")).thenReturn(Optional.of(user));
+        when(requestRepository.findAll()
+                .stream()
+                .filter(r -> r.getUser().equals(user))
+                .collect(Collectors.toList())).thenReturn(expected);
 
-        assertEquals(expectedRequests, actualRequests);
+        List<Request> actual = sut.getRequestsByCurrentUser(principal);
+        assertEquals(expected, actual);
     }
 
-    private User addUser(String firstName, String lastName, String phoneNumber, String birthDate) {
-        User user = new User();
-        try {
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setPhoneNumber(phoneNumber);
-            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(birthDate);
-            user.setBirthDate(date);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+    private SignupRequest addUser() {
+        SignupRequest user = new SignupRequest();
+        user.setFirstName("firstname");
+        user.setLastName("lastname");
+        user.setPhoneNumber("87770806565");
+        LocalDate date = LocalDate.parse("1982-11-13");
+        user.setBirthDate(date);
+        user.setUsername("username");
+        user.setPassword("password");
+        user.setIsAdmin(true);
         return user;
     }
 
-    private Car addCar(String brand, String model, String color, Integer productionYear, Double price,
-                       Boolean isAvailable) {
+    private UserDTO addUserDTO(String firstName, String lastName, String phoneNumber, String birthDate,
+                               String username) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setFirstName(firstName);
+        userDTO.setLastName(lastName);
+        userDTO.setPhoneNumber(phoneNumber);
+        LocalDate date = LocalDate.parse(birthDate);
+        userDTO.setBirthDate(date);
+        userDTO.setUsername(username);
+        return userDTO;
+    }
+
+    private User userDtoToUser(UserDTO userDTO) {
+        User user = new User();
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setPhoneNumber(userDTO.getPhoneNumber());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setUsername(userDTO.getUsername());
+        return user;
+    }
+
+    private CarDTO addCar(String carNumber, String brand, String model,
+                          String color, Integer productionYear, Double price,
+                          Boolean isAvailable) {
+        CarDTO carDTO = new CarDTO();
+
+        carDTO.setCarNumber(carNumber);
+        carDTO.setBrand(brand);
+        carDTO.setModel(model);
+        carDTO.setColor(color);
+        carDTO.setProductionYear(productionYear);
+        carDTO.setPrice(price);
+        carDTO.setIsAvailable(isAvailable);
+
+        return carDTO;
+    }
+
+    private Car carDtoToCar(CarDTO carDTO) {
         Car car = new Car();
 
-        car.setBrand(brand);
-        car.setModel(model);
-        car.setColor(color);
-        car.setProductionYear(productionYear);
-        car.setPrice(price);
-        car.setIsAvailable(isAvailable);
+        car.setCarNumber(carDTO.getCarNumber());
+        car.setBrand(carDTO.getBrand());
+        car.setModel(carDTO.getModel());
+        car.setColor(carDTO.getColor());
+        car.setPrice(carDTO.getPrice());
+        car.setProductionYear(carDTO.getProductionYear());
+        car.setIsAvailable(carDTO.getIsAvailable());
 
         return car;
     }
 
-    private Request addRequest(User user, Car car, Boolean isAccepted) {
+    private Request addRequest(User user, Car car, LocalDateTime localDateTime) {
         Request request = new Request();
-
         request.setUser(user);
         request.setCar(car);
-        request.setRequestTime(new Date(System.currentTimeMillis()));
-        request.setIsAccepted(isAccepted);
-
+        request.setRequestTime(localDateTime);
+        request.setIsAccepted(false);
         return request;
     }
 }

@@ -2,9 +2,7 @@ package com.example.shop.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +17,20 @@ import java.util.stream.Collectors;
 public class LoggingAspect {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingAspect.class);
-    private static final String SERVICES_POINTCUT = "within(com.example.shop.services.*)";
 
-    @Around(SERVICES_POINTCUT)
+    @Pointcut("within(@org.springframework.stereotype.Service *)" +
+            " || within(@org.springframework.web.bind.annotation.RestController *)")
+    public void springBeanPointcut() {
+        // TODO document why this method is empty
+    }
+
+    @Pointcut("within(com.example.shop.services..*)" +
+            " || within(com.example.shop.controllers..*)")
+    public void applicationPackagePointcut() {
+        // TODO document why this method is empty
+    }
+
+    @Around("applicationPackagePointcut() && springBeanPointcut()")
     public Object logAroundExec(ProceedingJoinPoint pjp) throws Throwable {
         Object proceed = pjp.proceed();
         String loggingMessage = constructLogMsg(pjp);
@@ -33,7 +42,7 @@ public class LoggingAspect {
         return proceed;
     }
 
-    @AfterThrowing(pointcut = SERVICES_POINTCUT, throwing = "e")
+    @AfterThrowing(pointcut = "applicationPackagePointcut() && springBeanPointcut()", throwing = "e")
     public void logAfterException(JoinPoint jp, Exception e) {
         String loggingMessage = constructLogMsg(jp);
         String exceptionMessage = e.toString();

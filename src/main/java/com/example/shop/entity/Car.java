@@ -15,6 +15,9 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "car_number")
+    private String carNumber;
+
     @Column(name = "brand")
     private String brand;
 
@@ -33,13 +36,14 @@ public class Car {
     @Column(name = "is_available")
     private Boolean isAvailable;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.REFRESH, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "car", cascade = CascadeType.REFRESH, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Request> requests = new ArrayList<>();
 
     @Override
     public String toString() {
         return "Car{" +
                 "id=" + id +
+                ", carNumber='" + carNumber + '\'' +
                 ", brand='" + brand + '\'' +
                 ", model='" + model + '\'' +
                 ", color='" + color + '\'' +

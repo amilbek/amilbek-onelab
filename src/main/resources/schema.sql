@@ -3,11 +3,14 @@ create table users (
     first_name varchar(50) not null,
     last_name varchar(50) not null,
     phone_number varchar(12) unique not null,
-    birth_date date not null
+    birth_date date not null,
+    username varchar(50) unique not null,
+    password varchar(100) not null
 );
 
 create table cars (
     id bigint identity not null primary key,
+    car_number varchar(50) unique not null,
     brand varchar(50) not null,
     model varchar(50) not null,
     color varchar(50) not null,
