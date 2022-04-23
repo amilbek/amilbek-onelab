@@ -4,10 +4,14 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -18,16 +22,12 @@ public class LoggingAspect {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @Pointcut("within(@org.springframework.stereotype.Service *)" +
-            " || within(@org.springframework.web.bind.annotation.RestController *)")
+    @Pointcut("within(@org.springframework.stereotype.Service *)")
     public void springBeanPointcut() {
-        // TODO document why this method is empty
     }
 
-    @Pointcut("within(com.example.shop.services..*)" +
-            " || within(com.example.shop.controllers..*)")
+    @Pointcut("within(com.example.shop.services..*)")
     public void applicationPackagePointcut() {
-        // TODO document why this method is empty
     }
 
     @Around("applicationPackagePointcut() && springBeanPointcut()")
@@ -58,6 +58,34 @@ public class LoggingAspect {
         return "\nClass: " + method.getDeclaringClass().getSimpleName() +
                 ";\nMethod: " + method.getName() +
                 ";\nArguments: " + args;
+    }
+
+    @Pointcut("execution(public * com.example.shop.controllers..*.*(..))")
+    public void pointCut(){
+    }
+
+    @Before("pointCut()")
+    public void beforeMethod(JoinPoint joinPoint){
+        ServletRequestAttributes servletRequestAttributes =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        if (servletRequestAttributes == null) {
+            return;
+        }
+
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        String jsonString = (String) JSONObject.wrap(Arrays.toString(joinPoint.getArgs()));
+
+        LOG.info ("\n--- REQUEST INFORMATION --------\n" +
+                "Request URI: {}\n" +
+                "Controller: {}\n" +
+                "Method type: {}\n" +
+                "Request Parameters: {}\n" +
+                "--- REQUEST INFORMATION --------\n", requestURI,
+                joinPoint.getTarget().getClass().getSimpleName(), method, jsonString);
     }
 }
 
