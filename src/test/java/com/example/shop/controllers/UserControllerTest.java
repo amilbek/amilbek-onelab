@@ -64,11 +64,12 @@ class UserControllerTest {
                 "87770806565", "1982-11-13", "username");
         User user = userDtoToUser(userDTO);
 
+        when(responseErrorValidation.mapValidationService(bindingResult)).thenReturn(null);
         when(services.updateUser(userDTO, principal)).thenReturn(user);
         when(userTransition.userToUserDTO(user)).thenReturn(userDTO);
 
         ResponseEntity<Object> expected = new ResponseEntity<>(userDTO, HttpStatus.OK);
-        ResponseEntity<Object> actual = sut.updateUser(userDTO, bindingResult,principal);
+        ResponseEntity<Object> actual = sut.updateUser(userDTO, bindingResult, principal);
         assertEquals(expected, actual);
     }
 

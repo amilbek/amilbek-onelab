@@ -56,11 +56,11 @@ class AuthControllerTest {
         ResponseEntity<Object> expected =
                 ResponseEntity.ok(new JWTTokenSuccessResponse(true, "Bearer jwt"));
 
+        when(responseErrorValidation.mapValidationService(bindingResult)).thenReturn(null);
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(),
                 loginRequest.getPassword()
         ))).thenReturn(authentication);
-
         when(jwtTokenProvider.generateToken(authentication)).thenReturn("jwt");
 
         ResponseEntity<Object> actual = sut.authenticateUser(loginRequest, bindingResult);
@@ -80,6 +80,7 @@ class AuthControllerTest {
         signupRequest.setPassword("password");
         signupRequest.setIsAdmin(false);
 
+        when(responseErrorValidation.mapValidationService(bindingResult)).thenReturn(null);
         when(services.saveUser(signupRequest)).thenReturn(true);
 
         ResponseEntity<Object> expected = ResponseEntity.ok(Constants.REGISTRATION_SUCCEED);
